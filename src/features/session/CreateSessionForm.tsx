@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PresetPicker } from "@/components/PresetPicker";
+import { usePresets } from "@/hooks/use-presets";
 import { slugify } from "@/lib/slug";
 import { createSession } from "@/features/session/actions";
 
@@ -15,6 +17,7 @@ const ERROR_MESSAGE = {
 
 export function CreateSessionForm() {
   const router = useRouter();
+  const { presets, addPreset } = usePresets();
   const [isPending, startTransition] = useTransition();
   const [slugInput, setSlugInput] = useState("");
   const [creatorName, setCreatorName] = useState("");
@@ -77,28 +80,22 @@ export function CreateSessionForm() {
       </div>
 
       <div className="flex gap-4">
-        <div className="flex flex-1 flex-col gap-1.5">
-          <Label htmlFor="focusMinutes">Foco (min)</Label>
-          <Input
-            id="focusMinutes"
-            type="number"
-            min={1}
-            max={180}
-            value={focusMinutes}
-            onChange={(e) => setFocusMinutes(Number(e.target.value))}
-          />
-        </div>
-        <div className="flex flex-1 flex-col gap-1.5">
-          <Label htmlFor="breakMinutes">Pausa (min)</Label>
-          <Input
-            id="breakMinutes"
-            type="number"
-            min={1}
-            max={60}
-            value={breakMinutes}
-            onChange={(e) => setBreakMinutes(Number(e.target.value))}
-          />
-        </div>
+        <PresetPicker
+          id="focusMinutes"
+          label="Foco (min)"
+          value={focusMinutes}
+          presets={presets.focus}
+          onChange={setFocusMinutes}
+          onAdd={(minutes) => addPreset("focus", minutes)}
+        />
+        <PresetPicker
+          id="breakMinutes"
+          label="Pausa (min)"
+          value={breakMinutes}
+          presets={presets.break}
+          onChange={setBreakMinutes}
+          onAdd={(minutes) => addPreset("break", minutes)}
+        />
       </div>
 
       <Button type="submit" size="lg" disabled={isPending}>

@@ -14,7 +14,11 @@ const STORAGE_KEY = "syncpair:solo-timer";
 const DEFAULT_FOCUS_MINUTES = 25;
 const DEFAULT_BREAK_MINUTES = 5;
 
-type Action = { type: "start"; phase: Phase } | { type: "tick" } | { type: "hydrate"; state: TimerState };
+type Action =
+  | { type: "start"; phase: Phase }
+  | { type: "tick" }
+  | { type: "hydrate"; state: TimerState }
+  | { type: "setDuration"; phase: Phase; minutes: number };
 
 function reducer(state: TimerState, action: Action): TimerState {
   switch (action.type) {
@@ -24,6 +28,13 @@ function reducer(state: TimerState, action: Action): TimerState {
       return isExpired(state) ? expirePhase(state) : state;
     case "hydrate":
       return action.state;
+    case "setDuration": {
+      if (!Number.isFinite(action.minutes) || action.minutes <= 0) return state;
+      const seconds = Math.round(action.minutes * 60);
+      return action.phase === "focus"
+        ? { ...state, focusDurationSec: seconds }
+        : { ...state, breakDurationSec: seconds };
+    }
   }
 }
 
@@ -71,5 +82,9 @@ export function useSoloTimer() {
     return () => clearInterval(id);
   }, [state.status, state.endsAt]);
 
-  return { state, start: (phase: Phase) => dispatch({ type: "start", phase }) };
+  return {
+    state,
+    start: (phase: Phase) => dispatch({ type: "start", phase }),
+    setDuration: (phase: Phase, minutes: number) => dispatch({ type: "setDuration", phase, minutes }),
+  };
 }
