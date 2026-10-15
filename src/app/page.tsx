@@ -12,7 +12,7 @@ export default function Home() {
       <SoloTimer />
       <footer className="flex items-center justify-center pb-10">
         <Link href="/new" className="text-sm text-muted-foreground underline-offset-4 hover:underline">
-          Criar uma sessão compartilhada →
+          Create a shared session →
         </Link>
       </footer>
     </main>

@@ -18,7 +18,12 @@ type Action =
   | { type: "start"; phase: Phase }
   | { type: "tick" }
   | { type: "hydrate"; state: TimerState }
-  | { type: "setDuration"; phase: Phase; minutes: number };
+  | { type: "startWithDuration"; phase: Phase; minutes: number };
+
+function withDuration(state: TimerState, phase: Phase, minutes: number): TimerState {
+  const seconds = Math.round(minutes * 60);
+  return phase === "focus" ? { ...state, focusDurationSec: seconds } : { ...state, breakDurationSec: seconds };
+}
 
 function reducer(state: TimerState, action: Action): TimerState {
   switch (action.type) {
@@ -28,12 +33,9 @@ function reducer(state: TimerState, action: Action): TimerState {
       return isExpired(state) ? expirePhase(state) : state;
     case "hydrate":
       return action.state;
-    case "setDuration": {
+    case "startWithDuration": {
       if (!Number.isFinite(action.minutes) || action.minutes <= 0) return state;
-      const seconds = Math.round(action.minutes * 60);
-      return action.phase === "focus"
-        ? { ...state, focusDurationSec: seconds }
-        : { ...state, breakDurationSec: seconds };
+      return startPhase(withDuration(state, action.phase, action.minutes), action.phase);
     }
   }
 }
@@ -85,6 +87,6 @@ export function useSoloTimer() {
   return {
     state,
     start: (phase: Phase) => dispatch({ type: "start", phase }),
-    setDuration: (phase: Phase, minutes: number) => dispatch({ type: "setDuration", phase, minutes }),
+    startWithDuration: (phase: Phase, minutes: number) => dispatch({ type: "startWithDuration", phase, minutes }),
   };
 }

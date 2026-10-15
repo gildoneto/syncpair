@@ -8,7 +8,7 @@ import { formatDuration } from "@/lib/timer/format";
 import { sessionRowToTimerState, type SessionRow } from "@/types/session";
 import { useSessionRoom } from "@/features/session/useSessionRoom";
 
-const PHASE_LABEL = { focus: "Foco", break: "Pausa" } as const;
+const PHASE_LABEL = { focus: "Focus", break: "Break" } as const;
 
 export function SessionRoom({
   slug,
@@ -51,15 +51,15 @@ export function SessionRoom({
       {state.status === "idle" ? (
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Button size="lg" onClick={() => startPhase(state.phase)}>
-            Começar {PHASE_LABEL[state.phase].toLowerCase()}
+            Start {PHASE_LABEL[state.phase].toLowerCase()}
           </Button>
           <Button size="lg" variant="outline" onClick={() => startPhase(otherPhase)}>
-            Começar {PHASE_LABEL[otherPhase].toLowerCase()}
+            Start {PHASE_LABEL[otherPhase].toLowerCase()}
           </Button>
         </div>
       ) : (
         <Button size="lg" variant="ghost" onClick={() => startPhase(otherPhase)}>
-          Pular para {PHASE_LABEL[otherPhase].toLowerCase()}
+          Skip to {PHASE_LABEL[otherPhase].toLowerCase()}
         </Button>
       )}
 
@@ -68,7 +68,7 @@ export function SessionRoom({
           <p className="text-sm text-muted-foreground">{participants.map((p) => p.name).join(", ")}</p>
         )}
         <Button variant="ghost" size="sm" onClick={copyLink}>
-          {copied ? "Link copiado!" : "Copiar link da sessão"}
+          {copied ? "Link copied!" : "Copy session link"}
         </Button>
       </div>
     </div>

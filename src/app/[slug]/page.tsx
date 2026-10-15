@@ -12,12 +12,12 @@ export default async function SessionPage({ params }: { params: Promise<{ slug: 
   if (!row) {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-        <h1 className="text-2xl font-bold text-foreground">Essa sessão não existe</h1>
+        <h1 className="text-2xl font-bold text-foreground">This session doesn&apos;t exist</h1>
         <p className="max-w-sm text-muted-foreground">
-          O link pode estar errado, ou a sessão expirou por inatividade.
+          The link might be wrong, or the session expired from inactivity.
         </p>
         <Link href="/new" className="text-sm text-primary underline-offset-4 hover:underline">
-          Criar uma nova sessão
+          Create a new session
         </Link>
       </main>
     );

@@ -2,16 +2,16 @@
 
 import { Button } from "@/components/ui/button";
 import { LampMotif } from "@/components/motifs/LampMotif";
-import { PresetPicker } from "@/components/PresetPicker";
+import { DurationCircles } from "@/components/DurationCircles";
 import { useCountdown } from "@/hooks/use-countdown";
 import { usePresets } from "@/hooks/use-presets";
 import { formatDuration } from "@/lib/timer/format";
 import { useSoloTimer } from "@/features/solo-timer/useSoloTimer";
 
-const PHASE_LABEL = { focus: "Foco", break: "Pausa" } as const;
+const PHASE_LABEL = { focus: "Focus", break: "Break" } as const;
 
 export function SoloTimer() {
-  const { state, start, setDuration } = useSoloTimer();
+  const { state, start, startWithDuration } = useSoloTimer();
   const { presets, addPreset } = usePresets();
   const secondsLeft = useCountdown(state);
   const otherPhase = state.phase === "focus" ? "break" : "focus";
@@ -29,39 +29,26 @@ export function SoloTimer() {
         </span>
       </div>
 
-      {state.status === "idle" && (
-        <div className="flex flex-wrap items-start justify-center gap-6">
-          <PresetPicker
-            id="solo-focus-minutes"
-            label="Foco (min)"
-            value={Math.round(state.focusDurationSec / 60)}
+      {state.status === "idle" ? (
+        <div className="flex flex-wrap items-start justify-center gap-10">
+          <DurationCircles
+            label="Focus"
             presets={presets.focus}
-            onChange={(minutes) => setDuration("focus", minutes)}
+            value={Math.round(state.focusDurationSec / 60)}
+            onSelect={(minutes) => startWithDuration("focus", minutes)}
             onAdd={(minutes) => addPreset("focus", minutes)}
           />
-          <PresetPicker
-            id="solo-break-minutes"
-            label="Pausa (min)"
-            value={Math.round(state.breakDurationSec / 60)}
+          <DurationCircles
+            label="Break"
             presets={presets.break}
-            onChange={(minutes) => setDuration("break", minutes)}
+            value={Math.round(state.breakDurationSec / 60)}
+            onSelect={(minutes) => startWithDuration("break", minutes)}
             onAdd={(minutes) => addPreset("break", minutes)}
           />
         </div>
-      )}
-
-      {state.status === "idle" ? (
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Button size="lg" onClick={() => start(state.phase)}>
-            Começar {PHASE_LABEL[state.phase].toLowerCase()}
-          </Button>
-          <Button size="lg" variant="outline" onClick={() => start(otherPhase)}>
-            Começar {PHASE_LABEL[otherPhase].toLowerCase()}
-          </Button>
-        </div>
       ) : (
         <Button size="lg" variant="ghost" onClick={() => start(otherPhase)}>
-          Pular para {PHASE_LABEL[otherPhase].toLowerCase()}
+          Skip to {PHASE_LABEL[otherPhase].toLowerCase()}
         </Button>
       )}
     </div>

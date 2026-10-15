@@ -13,13 +13,13 @@ const nunito = Nunito({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
   title: "Syncpair",
-  description: "Um timer de foco e pausa compartilhado, gratuito para sempre.",
+  description: "A shared focus and break timer, free forever.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="pt-BR"
+      lang="en"
       className={`${nunito.variable} h-full antialiased`}
       suppressHydrationWarning
     >

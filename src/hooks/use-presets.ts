@@ -16,9 +16,9 @@ function addSorted(list: number[], minutes: number): number[] {
 }
 
 /**
- * One shared list of focus/break duration presets (decision: "lista única"),
- * used by both the solo timer and the create-session form — a preset saved
- * in either place shows up clickable in both.
+ * One shared list of focus/break duration presets, used by both the solo
+ * timer and the create-session wizard — a preset saved in either place shows
+ * up clickable in both.
  */
 export function usePresets() {
   const [presets, setPresets] = useState<PresetsState>(DEFAULT_PRESETS);
