@@ -21,10 +21,10 @@ export function SoloTimer() {
       <LampMotif phase={state.phase} status={state.status} className="h-48 w-36" />
 
       <div className="flex flex-col items-center gap-2">
-        <span className="text-sm font-medium tracking-wide text-muted-foreground uppercase">
+        <span className="text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
           {PHASE_LABEL[state.phase]}
         </span>
-        <span className="font-mono text-7xl font-semibold tabular-nums text-foreground">
+        <span className="text-[clamp(3.5rem,12vw,6rem)] font-extrabold tracking-[-0.02em] tabular-nums text-foreground">
           {formatDuration(secondsLeft)}
         </span>
       </div>

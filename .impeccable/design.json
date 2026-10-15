@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-15T00:00:00.000Z",
+  "title": "Design System: Syncpair",
+  "extensions": {
+    "colorMeta": {
+      "brasa": {
+        "role": "primary",
+        "displayName": "Brasa",
+        "canonical": "oklch(0.62 0.17 45)",
+        "tonalRamp": [
+          "oklch(0.15 0.08 45)",
+          "oklch(0.28 0.12 45)",
+          "oklch(0.40 0.15 45)",
+          "oklch(0.50 0.17 45)",
+          "oklch(0.62 0.17 45)",
+          "oklch(0.72 0.15 45)",
+          "oklch(0.82 0.10 45)",
+          "oklch(0.92 0.05 45)"
+        ]
+      },
+      "chama": {
+        "role": "secondary",
+        "displayName": "Chama",
+        "canonical": "oklch(0.75 0.18 55)",
+        "tonalRamp": [
+          "oklch(0.15 0.07 55)",
+          "oklch(0.28 0.11 55)",
+          "oklch(0.42 0.14 55)",
+          "oklch(0.55 0.17 55)",
+          "oklch(0.65 0.18 55)",
+          "oklch(0.75 0.18 55)",
+          "oklch(0.85 0.12 55)",
+          "oklch(0.93 0.06 55)"
+        ]
+      },
+      "rescaldo": {
+        "role": "secondary",
+        "displayName": "Rescaldo",
+        "canonical": "oklch(0.6 0.06 50)",
+        "tonalRamp": [
+          "oklch(0.15 0.02 50)",
+          "oklch(0.25 0.03 50)",
+          "oklch(0.35 0.04 50)",
+          "oklch(0.45 0.05 50)",
+          "oklch(0.55 0.06 50)",
+          "oklch(0.6 0.06 50)",
+          "oklch(0.75 0.04 50)",
+          "oklch(0.9 0.02 50)"
+        ]
+      },
+      "fundo": {
+        "role": "neutral",
+        "displayName": "Fundo",
+        "canonical": "oklch(0.98 0.012 70)",
+        "tonalRamp": [
+          "oklch(0.16 0.015 40)",
+          "oklch(0.28 0.015 50)",
+          "oklch(0.4 0.013 55)",
+          "oklch(0.55 0.013 60)",
+          "oklch(0.7 0.012 65)",
+          "oklch(0.85 0.012 68)",
+          "oklch(0.93 0.012 70)",
+          "oklch(0.98 0.012 70)"
+        ]
+      },
+      "tinta": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "canonical": "oklch(0.22 0.025 50)",
+        "tonalRamp": [
+          "oklch(0.1 0.02 50)",
+          "oklch(0.22 0.025 50)",
+          "oklch(0.35 0.03 50)",
+          "oklch(0.5 0.035 50)",
+          "oklch(0.65 0.035 55)",
+          "oklch(0.78 0.03 60)",
+          "oklch(0.88 0.02 65)",
+          "oklch(0.96 0.012 70)"
+        ]
+      },
+      "superficie": {
+        "role": "neutral",
+        "displayName": "Superfície",
+        "canonical": "oklch(0.995 0.008 70)",
+        "tonalRamp": [
+          "oklch(0.21 0.02 45)",
+          "oklch(0.3 0.018 50)",
+          "oklch(0.42 0.015 55)",
+          "oklch(0.55 0.013 60)",
+          "oklch(0.7 0.01 65)",
+          "oklch(0.85 0.009 68)",
+          "oklch(0.93 0.008 70)",
+          "oklch(0.995 0.008 70)"
+        ]
+      },
+      "neutro-suave": {
+        "role": "neutral",
+        "displayName": "Neutro Suave",
+        "canonical": "oklch(0.93 0.02 60)",
+        "tonalRamp": [
+          "oklch(0.26 0.02 45)",
+          "oklch(0.35 0.02 50)",
+          "oklch(0.48 0.02 55)",
+          "oklch(0.6 0.02 58)",
+          "oklch(0.75 0.02 60)",
+          "oklch(0.85 0.02 60)",
+          "oklch(0.93 0.02 60)",
+          "oklch(0.97 0.015 65)"
+        ]
+      },
+      "neutro-texto": {
+        "role": "neutral",
+        "displayName": "Neutro Texto",
+        "canonical": "oklch(0.5 0.035 50)",
+        "tonalRamp": [
+          "oklch(0.2 0.025 45)",
+          "oklch(0.3 0.03 48)",
+          "oklch(0.4 0.035 50)",
+          "oklch(0.5 0.035 50)",
+          "oklch(0.6 0.035 52)",
+          "oklch(0.68 0.035 55)",
+          "oklch(0.78 0.03 58)",
+          "oklch(0.88 0.02 62)"
+        ]
+      },
+      "borda": {
+        "role": "neutral",
+        "displayName": "Borda",
+        "canonical": "oklch(0.88 0.025 60)",
+        "tonalRamp": [
+          "oklch(0.3 0.02 50)",
+          "oklch(0.4 0.02 52)",
+          "oklch(0.55 0.022 55)",
+          "oklch(0.68 0.022 58)",
+          "oklch(0.78 0.025 60)",
+          "oklch(0.84 0.025 60)",
+          "oklch(0.88 0.025 60)",
+          "oklch(0.93 0.02 62)"
+        ]
+      },
+      "alerta": {
+        "role": "status",
+        "displayName": "Alerta",
+        "canonical": "oklch(0.577 0.245 27.325)",
+        "tonalRamp": [
+          "oklch(0.2 0.1 27)",
+          "oklch(0.32 0.15 27)",
+          "oklch(0.45 0.2 27)",
+          "oklch(0.577 0.245 27.325)",
+          "oklch(0.65 0.22 25)",
+          "oklch(0.704 0.191 22.216)",
+          "oklch(0.8 0.13 24)",
+          "oklch(0.9 0.07 26)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "O contador mm:ss — único elemento no peso/tamanho máximo do sistema." },
+      "headline": { "displayName": "Headline", "purpose": "Título de tela (ex: 'Criar uma sessão compartilhada')." },
+      "body": { "displayName": "Body", "purpose": "Texto corrido, placeholder, texto de botão." },
+      "label": { "displayName": "Label", "purpose": "Rótulo de estado (FOCO/PAUSA) e rótulo de chip de preset — maiúsculo, rastreado, só em textos curtos." }
+    },
+    "shadows": [
+      { "name": "glow-motif", "value": "0 0 48px oklch(0.75 0.18 55 / 0.35)", "purpose": "Halo ao redor do LampMotif quando a chama está acesa (foco rodando)." },
+      { "name": "glow-primary", "value": "0 0 24px oklch(0.62 0.17 45 / 0.25)", "purpose": "Halo sutil no hover/focus do botão primário, nunca combinado com borda." }
+    ],
+    "motion": [
+      { "name": "flame-flicker", "value": "2.4s ease-in-out infinite", "purpose": "Flicker sutil da chama acesa — única animação contínua do sistema." },
+      { "name": "ease-standard", "value": "cubic-bezier(0.165, 0.84, 0.44, 1)", "purpose": "Easing padrão (ease-out-quart) pra toda transição de estado — hover, foco, seleção de chip." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botão Primário",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação principal da tela — iniciar foco/pausa, criar sessão. Acende (glow) em vez de escurecer no hover.",
+      "html": "<button class=\"ds-btn-primary\">Começar foco</button>",
+      "css": ".ds-btn-primary { font-family: 'Nunito', system-ui, sans-serif; font-weight: 700; font-size: 0.875rem; background: var(--primary); color: var(--background); border: none; border-radius: 10px; padding: 8px 16px; cursor: pointer; transition: box-shadow 0.2s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.2s cubic-bezier(0.165, 0.84, 0.44, 1); } .ds-btn-primary:hover { box-shadow: 0 0 24px oklch(0.62 0.17 45 / 0.25); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px oklch(0.65 0.09 50 / 0.5); } .ds-btn-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Botão Outline",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Ação secundária ao lado da primária (ex: 'Começar pausa' ao lado de 'Começar foco').",
+      "html": "<button class=\"ds-btn-outline\">Começar pausa</button>",
+      "css": ".ds-btn-outline { font-family: 'Nunito', system-ui, sans-serif; font-weight: 700; font-size: 0.875rem; background: transparent; color: var(--foreground); border: 1px solid var(--border); border-radius: 10px; padding: 8px 16px; cursor: pointer; transition: background 0.2s cubic-bezier(0.165, 0.84, 0.44, 1); } .ds-btn-outline:hover { background: var(--muted); } .ds-btn-outline:focus-visible { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px oklch(0.65 0.09 50 / 0.5); }"
+    },
+    {
+      "name": "Chip de Preset (não selecionado)",
+      "kind": "chip",
+      "refersTo": "chip-default",
+      "description": "Duração de foco/pausa salva, clicável — estado não selecionado.",
+      "html": "<button class=\"ds-chip\">25 min</button>",
+      "css": ".ds-chip { font-family: 'Nunito', system-ui, sans-serif; font-weight: 700; font-size: 0.75rem; background: transparent; color: var(--muted-foreground); border: 1px solid var(--border); border-radius: 9999px; padding: 4px 10px; cursor: pointer; transition: background 0.2s cubic-bezier(0.165, 0.84, 0.44, 1), color 0.2s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.2s cubic-bezier(0.165, 0.84, 0.44, 1); } .ds-chip:hover { background: var(--muted); }"
+    },
+    {
+      "name": "Chip de Preset (selecionado)",
+      "kind": "chip",
+      "refersTo": "chip-selected",
+      "description": "Mesmo chip, estado selecionado — única vez que Brasa aparece a 10% de opacidade em vez de sólida.",
+      "html": "<button class=\"ds-chip-selected\">25 min</button>",
+      "css": ".ds-chip-selected { font-family: 'Nunito', system-ui, sans-serif; font-weight: 700; font-size: 0.75rem; background: oklch(0.62 0.17 45 / 0.1); color: var(--primary); border: 1px solid var(--primary); border-radius: 9999px; padding: 4px 10px; cursor: pointer; }"
+    },
+    {
+      "name": "Input de Texto",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo de texto/número padrão (nome da sessão, nome do participante, minutos).",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"co-writing\" />",
+      "css": ".ds-input { font-family: 'Nunito', system-ui, sans-serif; font-weight: 400; font-size: 1rem; background: transparent; color: var(--foreground); border: 1px solid var(--border); border-radius: 10px; padding: 4px 10px; height: 32px; transition: border-color 0.2s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.2s cubic-bezier(0.165, 0.84, 0.44, 1); } .ds-input::placeholder { color: var(--muted-foreground); } .ds-input:focus-visible { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px oklch(0.65 0.09 50 / 0.5); }"
+    },
+    {
+      "name": "Contador (Display)",
+      "kind": "custom",
+      "refersTo": "display",
+      "description": "O elemento mais olhado do produto inteiro — mm:ss em Nunito ExtraBold, dígitos tabulares, sem fonte monoespaçada.",
+      "html": "<span class=\"ds-countdown\">25:00</span>",
+      "css": ".ds-countdown { font-family: 'Nunito', system-ui, sans-serif; font-weight: 800; font-size: clamp(3.5rem, 12vw, 6rem); line-height: 1; letter-spacing: -0.02em; color: var(--foreground); font-variant-numeric: tabular-nums; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "A Vela de Trabalho",
+    "overview": "Syncpair é uma aplicação moderna, simples e funcional — no mesmo espírito do cuckoo.team que a inspirou — construída ao redor de uma vela que acende quando você foca e apaga quando você pausa. Nada aqui tenta parecer um painel corporativo de produtividade: é uma ferramenta pequena e gostosa de usar, que fica rodando de canto enquanto a pessoa trabalha em outra coisa, e que ela só espia de vez em quando. A tipografia precisa carregar esse clima sozinha, já que não há ilustração nenhuma além da própria vela — por isso a troca de uma sans técnica e neutra (Geist) para uma sans arredondada e calorosa (Nunito) é a mudança estrutural desta passada. O sistema rejeita explicitamente: o roxo frio e distante do cuckoo.team original; clichês de SaaS corporativo; e o tom clínico de ferramenta de gestão de projetos.",
+    "keyCharacteristics": [
+      "Paleta inteiramente quente (âmbar sobre fundo claro ou escuro quentes), nunca neutra fria",
+      "Uma família tipográfica só (Nunito), variando peso — não indecisão de múltiplas fontes",
+      "Chato por padrão (sem sombra dura), com brilho difuso e quente só nos pontos que a vela ilumina",
+      "Hierarquia carregada inteiramente por peso e tamanho, nunca por cor de destaque isolada"
+    ],
+    "rules": [
+      { "name": "A Regra da Chama Isolada", "body": "--flame/--flame-dim nunca referenciam --primary. Um ajuste de paleta de botões/links não pode, sem querer, mudar a cor do mascote — e vice-versa.", "section": "colors" },
+      { "name": "A Regra da Cor Rara", "body": "Brasa aparece em no máximo um elemento de destaque por tela. A raridade é o que dá peso a ela.", "section": "colors" },
+      { "name": "A Regra do Dígito Tabular", "body": "O contador usa font-variant-numeric: tabular-nums, nunca uma fonte monoespaçada à parte.", "section": "typography" },
+      { "name": "A Regra do Peso Único", "body": "Hierarquia vem de variar o peso (400 a 800) de uma família só, nunca de introduzir uma segunda ou terceira fonte.", "section": "typography" },
+      { "name": "A Regra do Brilho, Nunca da Sombra-Fantasma", "body": "Nenhum elemento combina borda de 1px e sombra difusa ao mesmo tempo. Onde há brilho, não há borda; onde há borda, não há brilho.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do usar Nunito em todo o produto, variando só o peso (400/600/700/800) pra hierarquia — nunca introduzir uma segunda família.",
+      "Do manter Brasa restrita a um elemento de destaque por tela.",
+      "Do aplicar font-variant-numeric: tabular-nums em todo número que muda — nunca trocar de fonte só por causa disso.",
+      "Do respeitar prefers-reduced-motion em toda animação, incluindo o flicker da chama."
+    ],
+    "donts": [
+      "Don't reintroduzir a paleta roxa fria do cuckoo.team original.",
+      "Don't usar gradiente decorativo, grid de cards idênticos, ou métrica gigante em destaque.",
+      "Don't combinar borda de 1px com sombra difusa (box-shadow blur >= 16px) no mesmo elemento.",
+      "Don't deixar a letra do contador mais apertada que -0.04em, nem o tamanho passar de 6rem/96px.",
+      "Don't usar --flame/--flame-dim em nada fora do LampMotif."
+    ]
+  }
+}

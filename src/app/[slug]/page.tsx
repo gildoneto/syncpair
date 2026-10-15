@@ -12,7 +12,7 @@ export default async function SessionPage({ params }: { params: Promise<{ slug: 
   if (!row) {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-        <h1 className="text-2xl font-semibold text-foreground">Essa sessão não existe</h1>
+        <h1 className="text-2xl font-bold text-foreground">Essa sessão não existe</h1>
         <p className="max-w-sm text-muted-foreground">
           O link pode estar errado, ou a sessão expirou por inatividade.
         </p>
@@ -26,7 +26,7 @@ export default async function SessionPage({ params }: { params: Promise<{ slug: 
   return (
     <main className="flex flex-1 flex-col">
       <header className="flex items-center justify-center py-6">
-        <span className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+        <span className="text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
           Syncpair
         </span>
       </header>

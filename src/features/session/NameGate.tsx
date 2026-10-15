@@ -41,7 +41,7 @@ export function NameGate({ slug, initial }: { slug: string; initial: SessionRow 
   if (!name) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6">
-        <p className="text-sm font-medium tracking-wide text-muted-foreground uppercase">
+        <p className="text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
           Qual é o seu nome?
         </p>
         <form onSubmit={handleSubmit} className="flex w-full max-w-xs gap-2">
