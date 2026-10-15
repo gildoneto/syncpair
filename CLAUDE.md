@@ -25,6 +25,10 @@ Nasceu de uma sessão `/grill-me` completa (pesquisa do cuckoo.team via Wayback 
 - **Visual**: inspirado, não clonado — mascote próprio (luminária/vela que acende no foco e apaga na pausa), substituindo o passarinho-no-ovo original. Paleta totalmente aconchegante (âmbar/laranja, fundo escuro quente), tanto no claro quanto no escuro — ver tokens `--flame`/`--flame-dim` isolados de `--primary` em `globals.css`.
 - **Nome do projeto**: "Syncpair" — verificado via API de domínio da Vercel que `syncpair.team`/`.work`/`.dev` estão disponíveis de verdade, e que `syncpair.vercel.app` está livre (confirmado via 404 real da própria Vercel, não só lookup de registro). Dois candidatos anteriores (Pairly, Focusprint) foram descartados por já serem produtos reais ocupando o nome E o subdomínio `.vercel.app` exato.
 - **Lint**: `react-hooks/set-state-in-effect` rebaixado pra `warn` em `eslint.config.mjs` (mesmo padrão do gastos-imovel) — seedar state a partir de uma leitura não-determinística/browser-only (`Date.now()`, `localStorage`, `window.location`, `crypto.randomUUID()`) é legítimo, e essa regra nova do `eslint-config-next` sinaliza isso como erro.
+- **Idioma da UI: inglês** (`lang="en"`, decisão explícita do usuário) — todo texto voltado ao usuário (telas, mensagens de erro, metadata) é em inglês. Documentação do projeto (este arquivo, `PRODUCT.md`, `DESIGN.md`) continua em português, pelo mesmo motivo que esta conversa é em português: é a língua do usuário, não do produto.
+- **Tipografia**: Nunito (variável, sem `weight` array — ver comentário em `layout.tsx`: Next 16/Turbopack quebra se você tentar passar pesos discretos num Google Font variável). Substituiu a Geist padrão do create-next-app.
+- **Fluxo de criar sessão é um wizard de 3 passos** (`NewSessionWizard.tsx`), não um formulário de tela única — inspirado na análise do fluxo original do cuckoo.team (homepage de um campo só → gate de nome → tela de duração). Nome da sessão → seu nome → duração, stepper local (sem rota por passo).
+- **Duração é escolhida por círculos de tamanho proporcional** (`DurationCircles.tsx` + `src/lib/circle-size.ts`, raiz quadrada do valor — área proporcional, não diâmetro), não por input numérico + chips. Tocar no círculo já aplica; no timer solo, já começa a contagem direto (sem botão de confirmação). Adicionar um valor customizado é uma ação secundária discreta (um "+" tracejado), nunca um input sempre visível.
 
 ## Infraestrutura (LIVE)
 
@@ -41,36 +45,40 @@ Nasceu de uma sessão `/grill-me` completa (pesquisa do cuckoo.team via Wayback 
 src/
   app/
     page.tsx                         [PRONTO] timer solo (root) — zero import de Supabase
-    new/page.tsx                     [PRONTO] form criar sessão (slug custom + fallback aleatório)
+    new/page.tsx                     [PRONTO] hospeda o NewSessionWizard
     [slug]/page.tsx                  [PRONTO] fetch da sessão (Server Component) + not-found state
     api/cron/expire-sessions/route.ts [PRONTO, não testado em prod] expira sessões com >48h de inatividade
-    layout.tsx                       [PRONTO] Providers (theme + toaster), metadataBase
-    globals.css                      [PRONTO] paleta quente OKLCH + tokens --flame/--flame-dim + keyframes do motif
+    layout.tsx                       [PRONTO] Nunito, Providers (theme + toaster), metadataBase, lang="en"
+    globals.css                      [PRONTO] paleta quente OKLCH + tokens --flame/--flame-dim/--shadow-glow-* + keyframes do motif
   components/
     ui/                              shadcn primitives (button, input, label)
     motifs/LampMotif.tsx             [PRONTO, 1ª versão] contrato visual — arte final é um passe de design separado
+    DurationCircles.tsx              [PRONTO] círculos de duração — ver "Padrões estabelecidos"
   features/
-    solo-timer/{SoloTimer.tsx,useSoloTimer.ts}       [PRONTO, verificado no browser]
+    solo-timer/{SoloTimer.tsx,useSoloTimer.ts}       [PRONTO, verificado no browser] círculos tocam-e-começa
     session/
-      CreateSessionForm.tsx / actions.ts              [PRONTO, verificado o caminho de erro — falta Supabase real]
+      NewSessionWizard.tsx / actions.ts               [PRONTO, verificado o caminho de erro — falta Supabase real] wizard de 3 passos
       NameGate.tsx / SessionRoom.tsx / useSessionRoom.ts [PRONTO, NÃO verificado end-to-end — precisa de Supabase real]
   lib/
     supabase/{client.ts,server.ts,admin.ts}  [PRONTO] — ver nota "Sem @supabase/ssr" acima
     timer/{state-machine.ts,format.ts}       [PRONTO, compartilhado solo+sessão]
     slug.ts                                   [PRONTO]
+    circle-size.ts                            [PRONTO] escala raiz-quadrada pro DurationCircles
     constants.ts                              [PRONTO] SESSION_EXPIRY_HOURS
   providers/index.tsx                [PRONTO] ThemeProvider (next-themes) + Toaster (sonner)
   types/session.ts                   [PRONTO] SessionRow + sessionRowToTimerState
-  hooks/use-countdown.ts             [PRONTO, compartilhado solo+sessão]
+  hooks/{use-countdown.ts,use-presets.ts} [PRONTO, compartilhado solo+sessão]
 supabase/migrations/0001_init.sql    [ESCRITO, NÃO RODADO]
 vercel.json                          [PRONTO] cron 1x/dia (10h UTC)
+PRODUCT.md / DESIGN.md / .impeccable/design.json  [PRONTO] gerados via skill impeccable — contexto estratégico/visual, em português
 ```
 
 ## Status atual (out/2026)
 
 **Código do v1 completo e passando `tsc`/`lint` limpos.** Verificado no browser:
-- Timer solo: ciclo completo foco→pausa, zero chamada de rede pro Supabase, sobrevive a refresh via localStorage, funciona offline, paleta quente confirmada em claro e escuro.
-- `/new`: formulário renderiza, preview de slug funciona, submissão falha com erro claro e esperado (`supabaseUrl is required`) — confirma que o caminho de código está certo, só falta credencial real.
+- Timer solo: círculos de duração tocam-e-começam (sem botão extra), ciclo completo foco→pausa, zero chamada de rede pro Supabase, sobrevive a refresh via localStorage, tipografia Nunito + brilho quente confirmados em claro e escuro.
+- `/new`: wizard de 3 passos completo (nome → seu nome → duração), voltar/continuar funcionando, adicionar preset customizado funcionando; submissão final falha com erro claro e esperado (`supabaseUrl is required`) — confirma que o caminho de código está certo, só falta credencial real.
+- Todo o texto voltado ao usuário em inglês (`lang="en"`).
 
 **Não verificado ainda** (precisa do Supabase real existir): criar sessão de verdade, `/[slug]` servindo uma sessão real, sync de presença/timer entre duas abas, o cron de expiração rodando contra dados reais, deploy na Vercel.
 
@@ -89,6 +97,7 @@ vercel.json                          [PRONTO] cron 1x/dia (10h UTC)
 - **Realtime**: um único channel por sessão (`session:<slug>`), presence + postgres_changes juntos — nunca dois channels pra mesma sala. Chave de presença gerada num `useEffect` (nunca em `useRef` lido durante o render — colidiria entre visitantes se a página fosse pré-renderizada).
 - **RLS**: `anon` pode select/insert/update (colunas específicas via `grant update (...) to anon`); delete só via `service_role` (só o cron usa). Ver `supabase/migrations/0001_init.sql`.
 - **Hostname nunca hardcoded**: link compartilhável usa `window.location.origin` (correto em qualquer domínio/preview automaticamente); `metadataBase` usa `NEXT_PUBLIC_APP_URL` (troca de domínio é só variável de ambiente).
+- **Presets de duração**: lista única compartilhada (`src/hooks/use-presets.ts`, localStorage) entre timer solo e wizard — um preset salvo em qualquer lugar aparece clicável nos dois. Sempre renderizado via `DurationCircles`, nunca um input numérico solto.
 
 ## Dev local
 
