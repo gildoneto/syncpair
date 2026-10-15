@@ -69,6 +69,15 @@ export function useSessionRoom(slug: string, initial: SessionRow, name: string |
     [slug, row.focus_duration_seconds, row.break_duration_seconds],
   );
 
+  const stopPhase = useCallback(async () => {
+    // Goes back to the two start buttons rather than guessing which phase
+    // (and duration) to jump into next — mirrors the solo timer's "Stop".
+    await supabase
+      .from("sessions")
+      .update({ status: "idle", phase_ends_at: null, last_active_at: new Date().toISOString() })
+      .eq("slug", slug);
+  }, [slug]);
+
   // Best-effort: whichever connected client is still open when a running
   // phase naturally hits zero writes the idle transition back. Guarded on
   // (status=running AND this exact phase_ends_at) so a race between tabs is
@@ -90,5 +99,5 @@ export function useSessionRoom(slug: string, initial: SessionRow, name: string |
     return () => clearTimeout(id);
   }, [slug, row.status, row.phase_ends_at]);
 
-  return { row, participants, startPhase };
+  return { row, participants, startPhase, stopPhase };
 }

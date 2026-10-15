@@ -11,10 +11,9 @@ import { useSoloTimer } from "@/features/solo-timer/useSoloTimer";
 const PHASE_LABEL = { focus: "Focus", break: "Break" } as const;
 
 export function SoloTimer() {
-  const { state, start, startWithDuration } = useSoloTimer();
+  const { state, startWithDuration, stop } = useSoloTimer();
   const { presets, addPreset } = usePresets();
   const secondsLeft = useCountdown(state);
-  const otherPhase = state.phase === "focus" ? "break" : "focus";
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
@@ -47,8 +46,8 @@ export function SoloTimer() {
           />
         </div>
       ) : (
-        <Button size="lg" variant="ghost" onClick={() => start(otherPhase)}>
-          Skip to {PHASE_LABEL[otherPhase].toLowerCase()}
+        <Button size="lg" variant="ghost" onClick={stop}>
+          Stop
         </Button>
       )}
     </div>

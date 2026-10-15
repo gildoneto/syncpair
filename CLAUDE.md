@@ -98,6 +98,7 @@ PRODUCT.md / DESIGN.md / .impeccable/design.json  [PRONTO] gerados via skill imp
 - **RLS**: `anon` pode select/insert/update (colunas específicas via `grant update (...) to anon`); delete só via `service_role` (só o cron usa). Ver `supabase/migrations/0001_init.sql`.
 - **Hostname nunca hardcoded**: link compartilhável usa `window.location.origin` (correto em qualquer domínio/preview automaticamente); `metadataBase` usa `NEXT_PUBLIC_APP_URL` (troca de domínio é só variável de ambiente).
 - **Presets de duração**: lista única compartilhada (`src/hooks/use-presets.ts`, localStorage) entre timer solo e wizard — um preset salvo em qualquer lugar aparece clicável nos dois. Sempre renderizado via `DurationCircles`, nunca um input numérico solto.
+- **Cursor pointer em todo elemento clicável**: regra global em `globals.css` (`button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }`), não uma classe `cursor-pointer` por componente — todo botão novo já nasce certo. Padrão esperado em qualquer projeto de frontend, não só aqui.
 
 ## Dev local
 

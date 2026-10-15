@@ -15,10 +15,10 @@ const DEFAULT_FOCUS_MINUTES = 25;
 const DEFAULT_BREAK_MINUTES = 5;
 
 type Action =
-  | { type: "start"; phase: Phase }
   | { type: "tick" }
   | { type: "hydrate"; state: TimerState }
-  | { type: "startWithDuration"; phase: Phase; minutes: number };
+  | { type: "startWithDuration"; phase: Phase; minutes: number }
+  | { type: "stop" };
 
 function withDuration(state: TimerState, phase: Phase, minutes: number): TimerState {
   const seconds = Math.round(minutes * 60);
@@ -27,16 +27,21 @@ function withDuration(state: TimerState, phase: Phase, minutes: number): TimerSt
 
 function reducer(state: TimerState, action: Action): TimerState {
   switch (action.type) {
-    case "start":
-      return startPhase(state, action.phase);
     case "tick":
       return isExpired(state) ? expirePhase(state) : state;
     case "hydrate":
-      return action.state;
+      // Never resume as "running": a fresh page load shouldn't greet you with
+      // someone else's (or yesterday's) countdown already ticking. Durations
+      // and the last-used phase carry over; only the live run state doesn't.
+      return { ...action.state, status: "idle", endsAt: null };
     case "startWithDuration": {
       if (!Number.isFinite(action.minutes) || action.minutes <= 0) return state;
       return startPhase(withDuration(state, action.phase, action.minutes), action.phase);
     }
+    case "stop":
+      // Goes back to the duration pickers rather than guessing which
+      // duration to reuse for "the other phase" — see decision discussion.
+      return { ...state, status: "idle", endsAt: null };
   }
 }
 
@@ -86,7 +91,7 @@ export function useSoloTimer() {
 
   return {
     state,
-    start: (phase: Phase) => dispatch({ type: "start", phase }),
     startWithDuration: (phase: Phase, minutes: number) => dispatch({ type: "startWithDuration", phase, minutes }),
+    stop: () => dispatch({ type: "stop" }),
   };
 }

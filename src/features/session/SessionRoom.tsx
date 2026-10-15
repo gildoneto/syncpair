@@ -19,7 +19,7 @@ export function SessionRoom({
   initial: SessionRow;
   name: string;
 }) {
-  const { row, participants, startPhase } = useSessionRoom(slug, initial, name);
+  const { row, participants, startPhase, stopPhase } = useSessionRoom(slug, initial, name);
   const state = sessionRowToTimerState(row);
   const secondsLeft = useCountdown(state);
   const otherPhase = state.phase === "focus" ? "break" : "focus";
@@ -58,8 +58,8 @@ export function SessionRoom({
           </Button>
         </div>
       ) : (
-        <Button size="lg" variant="ghost" onClick={() => startPhase(otherPhase)}>
-          Skip to {PHASE_LABEL[otherPhase].toLowerCase()}
+        <Button size="lg" variant="ghost" onClick={stopPhase}>
+          Stop
         </Button>
       )}
 
