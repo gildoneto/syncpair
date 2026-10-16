@@ -1,6 +1,6 @@
 # Syncpair — Contexto do Projeto
 
-> **Para uma nova conversa**: leia **Status atual** e **Próximos passos** abaixo. Resumo: o código do v1 está pronto e **Supabase já está criado, com a migration aplicada e verificado end-to-end** (GitHub também já existe, público). Falta só: testar sync entre duas abas, criar o projeto Vercel, e testar o cron de expiração.
+> **Para uma nova conversa**: leia **Status atual** e **Próximos passos** abaixo. Resumo: **v1 está no ar** — `https://syncpair.vercel.app` — com Supabase real por trás (GitHub, Supabase e Vercel todos criados e verificados end-to-end). Falta só: testar sync entre duas abas e testar o cron de expiração contra um registro real.
 
 ## O que é este projeto
 
@@ -29,6 +29,8 @@ Nasceu de uma sessão `/grill-me` completa (pesquisa do cuckoo.team via Wayback 
 - **Tipografia**: Nunito (variável, sem `weight` array — ver comentário em `layout.tsx`: Next 16/Turbopack quebra se você tentar passar pesos discretos num Google Font variável). Substituiu a Geist padrão do create-next-app.
 - **Fluxo de criar sessão é um wizard de 2 passos** (`NewSessionWizard.tsx`), não um formulário de tela única — inspirado na análise do fluxo original do cuckoo.team. Nome da sessão → seu nome → cria (stepper local, sem rota por passo). **Sem passo de duração**: a sessão nasce com os defaults da tabela (25min/5min) e a duração só é escolhida depois, na sala — ver bullet do `TimerControl` abaixo. Criar uma sessão não deveria exigir decidir quanto tempo de foco/pausa vai durar antes mesmo de existir.
 - **Duração é escolhida por círculos de tamanho proporcional** (`DurationCircles.tsx` + `src/lib/circle-size.ts`, raiz quadrada do valor — área proporcional, não diâmetro), não por input numérico + chips. Tocar no círculo já aplica; já começa a contagem direto (sem botão de confirmação). Adicionar um valor customizado é uma ação secundária discreta (um "+" tracejado), nunca um input sempre visível.
+- **`.npmrc` do projeto fixa `registry=https://registry.npmjs.org/`** — esta máquina também é usada pro trabalho, e o `~/.npmrc` global aponta pro Artifactory privado da Grainger. Isso **quebrou o primeiro deploy na Vercel**: o `package-lock.json` gerado localmente gravou 773 `resolved:` apontando pro registry privado, e o build remoto não consegue autenticar lá (erro `npm error code E401`). Corrigido regenerando o lockfile com `--registry=` explícito + `.npmrc` do projeto pra nunca mais depender do default global. **Todo projeto pessoal novo nesta máquina precisa desse mesmo `.npmrc`** (não existe equivalente ao `includeIf` do git pra isso — testado e confirmado que npm não lê `.npmrc` de pastas ancestrais, só da pasta exata do projeto + `~/.npmrc`).
+- **`cacheComponents`/`partialPrefetching` removidos do `next.config.ts`** — vieram do scaffold inicial (create-next-app), mas iam contra a decisão original de não usar Cache Components (nada no app se beneficia: `/` e `/new` são 100% client, só `/[slug]` busca dado do servidor, e esse dado é sempre ao vivo, nunca deveria cachear). Com `cacheComponents: true`, o build de produção falhava tentando prerenderizar `/[slug]` estaticamente; sem ele, a rota é corretamente `ƒ Dynamic`.
 - **`TimerControl` (`src/components/TimerControl.tsx`) é o motif+clock+menu+picker compartilhado entre timer solo E sala de sessão** — mesmo componente, não duas implementações paralelas. Idle sempre abre num menu de botões (nunca os dois conjuntos de círculos ao mesmo tempo): Focus/Break no timer solo e na sala (+ "Create a shared session" como `menuExtra`, só no solo). Clicar em Focus/Break revela só os círculos daquele tipo com um "Back"; `Stop` sempre volta pro menu, nunca direto pros círculos. Na sala, escolher a duração também já inicia a fase pra todo mundo (`startPhase(phase, minutes)`) — a duração deixou de ser fixada na criação da sessão, pode mudar a cada rodada. Mesmo princípio em toda a UI ("não mostrar opções demais a não ser que o usuário peça") — mais fiel ao cuckoo.team original, e evita duplicar essa lógica entre os dois modos.
 
 ## Infraestrutura (LIVE)
@@ -38,7 +40,7 @@ Nasceu de uma sessão `/grill-me` completa (pesquisa do cuckoo.team via Wayback 
 | GitHub | [`gildoneto/syncpair`](https://github.com/gildoneto/syncpair) | **Criado, público.** Repo local já tinha os commits; `gh repo create --source=. --push` criou e empurrou tudo de uma vez. |
 | Supabase | org `Syncpair`, projeto `syncpair` (ref `slprofzcpcysfupziwkw`, região Americas) | **Criado.** CLI instalado via `brew install supabase/tap/supabase`, `supabase login` + `supabase link --project-ref slprofzcpcysfupziwkw`. Faltam só as 2 API keys no `.env.local` (ver abaixo). |
 | Migration | `supabase/migrations/0001_init.sql` | **Rodada** via `supabase db push` (confirmado com `supabase migration list`: local=remote=`0001`). Verificado no dashboard: tabela `sessions` com as 10 colunas certas, 3 políticas RLS ativas, `sessions` presente na publication `supabase_realtime`. |
-| Vercel | `syncpair` | **Não criado ainda.** Nome confirmado disponível; falta `vercel link`/criar o projeto depois que o Supabase existir |
+| Vercel | [`syncpair`](https://syncpair.vercel.app) | **No ar.** Criado via `vercel link --yes --project syncpair` (CLI, não pelo MCP do Vercel — ver nota abaixo), git-conectado ao repo GitHub (push em `main` já dispara deploy de produção). As 5 env vars estão setadas em Production + Preview. |
 | Dev local | `npm --prefix syncpair run dev -- -p 3001` (via `~/workspace/personal/.claude/launch.json`, entry `syncpair-dev`) | Funciona — porta 3001 porque 3000 já é do recoffee no mesmo workspace |
 
 ## Estrutura de código
@@ -80,21 +82,22 @@ PRODUCT.md / DESIGN.md / .impeccable/design.json  [PRONTO] gerados via skill imp
 
 **Código do v1 completo e passando `tsc`/`lint` limpos.** Verificado no browser:
 - Timer solo: homepage abre num menu (Focus/Break/Create a shared session); Focus/Break revelam só os círculos daquele tipo (tocam-e-começam, sem botão extra) com um "Back"; Stop sempre volta pro menu. Ciclo completo foco→pausa, zero chamada de rede pro Supabase, sobrevive a refresh via localStorage, tipografia Nunito + brilho quente confirmados em claro e escuro.
-- `/new`: wizard de 2 passos completo (nome → seu nome → cria, sem passo de duração), voltar/continuar funcionando; submissão final falha com erro claro e esperado (`supabaseUrl is required`) — confirma que o caminho de código está certo, só falta credencial real.
+- `/new`: wizard de 2 passos completo (nome → seu nome → cria, sem passo de duração), voltar/continuar funcionando.
 - Todo o texto voltado ao usuário em inglês (`lang="en"`).
-- **Supabase end-to-end confirmado com dados reais** (uma sessão `verify-test` criada e depois apagada): `createSession` grava de verdade; `/[slug]` busca a sessão real e renderiza; `NameGate` + localStorage funcionando; Presence mostra o participante na sala; `TimerControl` inicia e para a fase com escrita real no Supabase, eco via Realtime em ~1-2s, motif acendendo/apagando certo. **Testado numa aba só** — sync entre duas abas simultâneas ainda não verificado literalmente, mas o mecanismo (um channel por sessão, presence + postgres_changes) já está confirmado funcionando ponta a ponta.
-- Aviso de dev (não é erro) do Next.js 16 em `/[slug]/page.tsx`: "Blocking Route — Next.js encountered uncached data during prerendering", porque o fetch do Supabase não tem cache. Esperado (cada sessão é dado ao vivo, nunca deveria cachear) — pode ser silenciado depois com `export const instant = false` na página, só não foi feito ainda por ser cosmético.
+- **Supabase end-to-end confirmado com dados reais, local E produção**: `createSession` grava de verdade; `/[slug]` busca a sessão real e renderiza; `NameGate` + localStorage funcionando; Presence mostra o participante na sala; `TimerControl` inicia e para a fase com escrita real no Supabase, eco via Realtime em ~1-2s, motif acendendo/apagando certo. Testado em `localhost:3001` e em `https://syncpair.vercel.app` (sessões de teste criadas e apagadas depois). **Testado numa aba só** — sync entre duas abas simultâneas ainda não verificado literalmente, mas o mecanismo (um channel por sessão, presence + postgres_changes) já está confirmado funcionando ponta a ponta.
+- **`https://syncpair.vercel.app` está no ar**, git-conectado: todo push em `main` builda e promove pra produção automaticamente.
 
-**Não verificado ainda**: sync entre duas abas simultâneas, cron de expiração rodando contra dado real, deploy na Vercel.
+**Não verificado ainda**: sync entre duas abas simultâneas, cron de expiração rodando contra dado real.
 
-**Supabase criado e com a migration aplicada** (ver tabela de Infraestrutura acima) — via CLI (`brew install supabase/tap/supabase`, não pelo SQL editor do dashboard: digitar SQL longo lá corrompe por causa do auto-indent/auto-fechamento de parênteses do editor). `supabase/migrations/0001_init.sql` é a fonte da verdade; qualquer mudança de schema futura deve ser uma nova migration + `supabase db push`, nunca editada direto no dashboard. `.env.local` já tem as 5 variáveis preenchidas com valores reais.
+**Ferramentas MCP do Vercel (`mcp__plugin_vercel_vercel__*`) estão sem permissão de escrita nesta conta** — qualquer chamada que não seja leitura (`create_git_project`, `create_deployment`, até `get_project`) retorna 403 "Not authorized... scope gildonetos-projects", mesmo com `list_projects`/`list_teams` funcionando. A conexão do plugin provavelmente precisa ser reautorizada pelo usuário. **Até lá, usar sempre o CLI (`vercel ...`) pra qualquer operação no Vercel deste projeto** — foi o que funcionou (login via terminal interativo, `vercel link`, `vercel env add --value ... --yes`, `vercel inspect <url> --wait`/`--logs`).
+
+**Supabase criado e com a migration aplicada** (ver tabela de Infraestrutura acima) — via CLI (`brew install supabase/tap/supabase`, não pelo SQL editor do dashboard: digitar SQL longo lá corrompe por causa do auto-indent/auto-fechamento de parênteses do editor). `supabase/migrations/0001_init.sql` é a fonte da verdade; qualquer mudança de schema futura deve ser uma nova migration + `supabase db push`, nunca editada direto no dashboard. `.env.local` tem as 5 variáveis preenchidas com valores reais; as mesmas 5 estão setadas na Vercel (Production + Preview).
 
 ## Próximos passos
 
-1. Abrir o mesmo link de sessão em duas abas e confirmar presença/timer sincronizando entre elas (o teste de uma aba só já passou).
-2. Criar projeto Vercel chamado exatamente `syncpair`, configurar as env vars (Produção + Preview), confirmar `syncpair.vercel.app` no ar.
-3. Testar o cron de expiração contra um registro de teste antes de confiar nele em produção.
-4. **v1.1** (fora de escopo agora, schema já comporta): Gravatar (hash de email local), sons de UI (hover, membro entrou, fim de foco/pausa — todos confirmados nos assets arquivados do original), ícones de convidar/feedback/editar sessão.
+1. Abrir o mesmo link de sessão em duas abas e confirmar presença/timer sincronizando entre elas (o teste de uma aba só já passou, local e em produção).
+2. Testar o cron de expiração contra um registro de teste antes de confiar nele em produção (ele já está deployado via `vercel.json`, só falta validar que dispara certo).
+3. **v1.1** (fora de escopo agora, schema já comporta): Gravatar (hash de email local), sons de UI (hover, membro entrou, fim de foco/pausa — todos confirmados nos assets arquivados do original), ícones de convidar/feedback/editar sessão.
 
 ## Padrões estabelecidos
 
@@ -117,4 +120,4 @@ Validação: `npx tsc --noEmit && npm run lint` (rodar de dentro de `syncpair/`)
 
 ## Deploy
 
-Ainda não feito — ver **Próximos passos** acima. Quando criar o projeto Vercel, usar exatamente o nome `syncpair` pra reservar `syncpair.vercel.app` (já confirmado livre).
+**No ar em [`https://syncpair.vercel.app`](https://syncpair.vercel.app).** Projeto Vercel `syncpair`, conectado ao repo GitHub — push em `main` builda e promove pra produção sozinho, sem passo manual. Ver "Padrões estabelecidos"/Status atual acima para os dois bugs que apareceram no primeiro deploy (registry do npm, `cacheComponents`) e a nota sobre usar CLI em vez do MCP pra operações no Vercel.
