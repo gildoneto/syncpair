@@ -3,13 +3,11 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 import { circleSize } from "@/lib/circle-size";
 
 interface DurationCirclesProps {
   label: string;
   presets: number[];
-  value: number;
   onSelect: (minutes: number) => void;
   onAdd: (minutes: number) => void;
 }
@@ -19,9 +17,11 @@ interface DurationCirclesProps {
  * replaces a number input + equal-sized chips with something you read at a
  * glance, no typing required for the common case. Adding a custom value is a
  * deliberately secondary action (the small dashed "+" circle), never a
- * visible text input sitting next to the presets.
+ * visible text input sitting next to the presets. None of them is ever shown
+ * pre-selected: that read as "already chosen," and people tapped it again
+ * expecting that to start the timer instead of just tapping any circle.
  */
-export function DurationCircles({ label, presets, value, onSelect, onAdd }: DurationCirclesProps) {
+export function DurationCircles({ label, presets, onSelect, onAdd }: DurationCirclesProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [draft, setDraft] = useState("");
 
@@ -41,19 +41,13 @@ export function DurationCircles({ label, presets, value, onSelect, onAdd }: Dura
       <div className="flex flex-wrap items-center justify-center gap-3">
         {presets.map((minutes) => {
           const size = circleSize(minutes, presets);
-          const selected = minutes === value;
           return (
             <button
               key={minutes}
               type="button"
               onClick={() => onSelect(minutes)}
               style={{ width: size, height: size }}
-              className={cn(
-                "flex shrink-0 items-center justify-center rounded-full border font-bold transition-colors active:scale-95",
-                selected
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:bg-muted",
-              )}
+              className="flex shrink-0 items-center justify-center rounded-full border border-border font-bold text-muted-foreground transition-colors active:scale-95 hover:bg-muted"
             >
               {minutes}
             </button>
