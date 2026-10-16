@@ -35,6 +35,7 @@ Nasceu de uma sessão `/grill-me` completa (pesquisa do cuckoo.team via Wayback 
 
 | Serviço | Projeto | Status |
 |---|---|---|
+| GitHub | [`gildoneto/syncpair`](https://github.com/gildoneto/syncpair) | **Criado, público.** Repo local já tinha os commits; `gh repo create --source=. --push` criou e empurrou tudo de uma vez. |
 | Supabase | — | **Não criado ainda.** Usuário precisa criar o projeto e colar `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` no `.env.local` |
 | Migration | `supabase/migrations/0001_init.sql` | Escrita, **não rodada** — aplicar via SQL editor do Supabase assim que o projeto existir |
 | Vercel | `syncpair` | **Não criado ainda.** Nome confirmado disponível; falta `vercel link`/criar o projeto depois que o Supabase existir |
