@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { SoloTimer } from "@/features/solo-timer/SoloTimer";
 
 export default function Home() {
@@ -10,11 +9,6 @@ export default function Home() {
         </span>
       </header>
       <SoloTimer />
-      <footer className="flex items-center justify-center pb-10">
-        <Link href="/new" className="text-sm text-muted-foreground underline-offset-4 hover:underline">
-          Create a shared session →
-        </Link>
-      </footer>
     </main>
   );
 }
