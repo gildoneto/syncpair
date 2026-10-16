@@ -1,6 +1,6 @@
 # Syncpair — Contexto do Projeto
 
-> **Para uma nova conversa**: leia **Status atual** e **Próximos passos** abaixo. Resumo: o código do v1 está pronto (timer solo + sessão compartilhada + realtime), mas **ainda não há projeto Supabase nem deploy** — falta o usuário criar a conta Supabase e colar 3 valores no `.env.local` antes de qualquer coisa que toque o banco funcionar de verdade.
+> **Para uma nova conversa**: leia **Status atual** e **Próximos passos** abaixo. Resumo: o código do v1 está pronto e **Supabase já está criado, com a migration aplicada e verificado end-to-end** (GitHub também já existe, público). Falta só: testar sync entre duas abas, criar o projeto Vercel, e testar o cron de expiração.
 
 ## O que é este projeto
 
@@ -36,8 +36,8 @@ Nasceu de uma sessão `/grill-me` completa (pesquisa do cuckoo.team via Wayback 
 | Serviço | Projeto | Status |
 |---|---|---|
 | GitHub | [`gildoneto/syncpair`](https://github.com/gildoneto/syncpair) | **Criado, público.** Repo local já tinha os commits; `gh repo create --source=. --push` criou e empurrou tudo de uma vez. |
-| Supabase | — | **Não criado ainda.** Usuário precisa criar o projeto e colar `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` no `.env.local` |
-| Migration | `supabase/migrations/0001_init.sql` | Escrita, **não rodada** — aplicar via SQL editor do Supabase assim que o projeto existir |
+| Supabase | org `Syncpair`, projeto `syncpair` (ref `slprofzcpcysfupziwkw`, região Americas) | **Criado.** CLI instalado via `brew install supabase/tap/supabase`, `supabase login` + `supabase link --project-ref slprofzcpcysfupziwkw`. Faltam só as 2 API keys no `.env.local` (ver abaixo). |
+| Migration | `supabase/migrations/0001_init.sql` | **Rodada** via `supabase db push` (confirmado com `supabase migration list`: local=remote=`0001`). Verificado no dashboard: tabela `sessions` com as 10 colunas certas, 3 políticas RLS ativas, `sessions` presente na publication `supabase_realtime`. |
 | Vercel | `syncpair` | **Não criado ainda.** Nome confirmado disponível; falta `vercel link`/criar o projeto depois que o Supabase existir |
 | Dev local | `npm --prefix syncpair run dev -- -p 3001` (via `~/workspace/personal/.claude/launch.json`, entry `syncpair-dev`) | Funciona — porta 3001 porque 3000 já é do recoffee no mesmo workspace |
 
@@ -82,16 +82,19 @@ PRODUCT.md / DESIGN.md / .impeccable/design.json  [PRONTO] gerados via skill imp
 - Timer solo: homepage abre num menu (Focus/Break/Create a shared session); Focus/Break revelam só os círculos daquele tipo (tocam-e-começam, sem botão extra) com um "Back"; Stop sempre volta pro menu. Ciclo completo foco→pausa, zero chamada de rede pro Supabase, sobrevive a refresh via localStorage, tipografia Nunito + brilho quente confirmados em claro e escuro.
 - `/new`: wizard de 2 passos completo (nome → seu nome → cria, sem passo de duração), voltar/continuar funcionando; submissão final falha com erro claro e esperado (`supabaseUrl is required`) — confirma que o caminho de código está certo, só falta credencial real.
 - Todo o texto voltado ao usuário em inglês (`lang="en"`).
+- **Supabase end-to-end confirmado com dados reais** (uma sessão `verify-test` criada e depois apagada): `createSession` grava de verdade; `/[slug]` busca a sessão real e renderiza; `NameGate` + localStorage funcionando; Presence mostra o participante na sala; `TimerControl` inicia e para a fase com escrita real no Supabase, eco via Realtime em ~1-2s, motif acendendo/apagando certo. **Testado numa aba só** — sync entre duas abas simultâneas ainda não verificado literalmente, mas o mecanismo (um channel por sessão, presence + postgres_changes) já está confirmado funcionando ponta a ponta.
+- Aviso de dev (não é erro) do Next.js 16 em `/[slug]/page.tsx`: "Blocking Route — Next.js encountered uncached data during prerendering", porque o fetch do Supabase não tem cache. Esperado (cada sessão é dado ao vivo, nunca deveria cachear) — pode ser silenciado depois com `export const instant = false` na página, só não foi feito ainda por ser cosmético.
 
-**Não verificado ainda** (precisa do Supabase real existir): criar sessão de verdade, `/[slug]` servindo uma sessão real, `SessionRoom` renderizando o `TimerControl` com dados reais (tsc confirma os tipos batendo, mas não foi visto no browser), sync de presença/timer entre duas abas, o cron de expiração rodando contra dados reais, deploy na Vercel.
+**Não verificado ainda**: sync entre duas abas simultâneas, cron de expiração rodando contra dado real, deploy na Vercel.
+
+**Supabase criado e com a migration aplicada** (ver tabela de Infraestrutura acima) — via CLI (`brew install supabase/tap/supabase`, não pelo SQL editor do dashboard: digitar SQL longo lá corrompe por causa do auto-indent/auto-fechamento de parênteses do editor). `supabase/migrations/0001_init.sql` é a fonte da verdade; qualquer mudança de schema futura deve ser uma nova migration + `supabase db push`, nunca editada direto no dashboard. `.env.local` já tem as 5 variáveis preenchidas com valores reais.
 
 ## Próximos passos
 
-1. **Usuário**: criar projeto Supabase (free tier), rodar `supabase/migrations/0001_init.sql` no SQL editor, colar as 3 keys no `.env.local` (copiar de `.env.local.example`).
-2. Com credenciais em mãos: testar criar sessão → abrir o link em duas abas → confirmar presença e timer sincronizando.
-3. Criar projeto Vercel chamado exatamente `syncpair`, configurar as env vars (Produção + Preview), confirmar `syncpair.vercel.app` no ar.
-4. Testar o cron de expiração contra um registro de teste antes de confiar nele em produção.
-5. **v1.1** (fora de escopo agora, schema já comporta): Gravatar (hash de email local), sons de UI (hover, membro entrou, fim de foco/pausa — todos confirmados nos assets arquivados do original), ícones de convidar/feedback/editar sessão.
+1. Abrir o mesmo link de sessão em duas abas e confirmar presença/timer sincronizando entre elas (o teste de uma aba só já passou).
+2. Criar projeto Vercel chamado exatamente `syncpair`, configurar as env vars (Produção + Preview), confirmar `syncpair.vercel.app` no ar.
+3. Testar o cron de expiração contra um registro de teste antes de confiar nele em produção.
+4. **v1.1** (fora de escopo agora, schema já comporta): Gravatar (hash de email local), sons de UI (hover, membro entrou, fim de foco/pausa — todos confirmados nos assets arquivados do original), ícones de convidar/feedback/editar sessão.
 
 ## Padrões estabelecidos
 
