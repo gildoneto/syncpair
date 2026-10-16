@@ -49,7 +49,7 @@ export function DurationCircles({ label, presets, value, onSelect, onAdd }: Dura
               onClick={() => onSelect(minutes)}
               style={{ width: size, height: size }}
               className={cn(
-                "flex shrink-0 items-center justify-center rounded-full border font-bold transition-colors",
+                "flex shrink-0 items-center justify-center rounded-full border font-bold transition-colors active:scale-95",
                 selected
                   ? "border-primary bg-primary/10 text-primary"
                   : "border-border text-muted-foreground hover:bg-muted",

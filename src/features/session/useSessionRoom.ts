@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/client";
 import type { Phase } from "@/lib/timer/state-machine";
 import type { SessionRow } from "@/types/session";
@@ -57,19 +58,37 @@ export function useSessionRoom(slug: string, initial: SessionRow, name: string |
   // mirroring the solo timer's startWithDuration) rather than reading it off
   // the row — the room no longer locks durations in at creation time, so
   // each start also writes the chosen value back into the matching column.
+  //
+  // Applied optimistically: waiting for our own write to round-trip back
+  // through Realtime before updating the screen reads as "nothing happened"
+  // on click (0.5-2s of dead air). Other participants still get the change
+  // at normal Realtime speed; only the clicking client needs the shortcut.
+  // Rolled back to the exact pre-click row (not just "whatever row is now")
+  // if the write itself fails, with a toast — sonner's Toaster is already
+  // mounted in Providers but was never actually used until this.
   const startPhase = useCallback(
     async (phase: Phase, minutes: number) => {
       const durationSec = Math.round(minutes * 60);
-      await supabase
-        .from("sessions")
-        .update({
-          phase,
-          status: "running",
-          phase_ends_at: new Date(Date.now() + durationSec * 1000).toISOString(),
-          [phase === "focus" ? "focus_duration_seconds" : "break_duration_seconds"]: durationSec,
-          last_active_at: new Date().toISOString(),
-        })
-        .eq("slug", slug);
+      const durationField = phase === "focus" ? "focus_duration_seconds" : "break_duration_seconds";
+      const patch: Partial<SessionRow> = {
+        phase,
+        status: "running",
+        phase_ends_at: new Date(Date.now() + durationSec * 1000).toISOString(),
+        last_active_at: new Date().toISOString(),
+        [durationField]: durationSec,
+      };
+
+      let previousRow!: SessionRow;
+      setRow((current) => {
+        previousRow = current;
+        return { ...current, ...patch };
+      });
+
+      const { error } = await supabase.from("sessions").update(patch).eq("slug", slug);
+      if (error) {
+        setRow(previousRow);
+        toast.error("Couldn't start — try again.");
+      }
     },
     [slug],
   );
@@ -77,10 +96,23 @@ export function useSessionRoom(slug: string, initial: SessionRow, name: string |
   const stopPhase = useCallback(async () => {
     // Goes back to the Focus/Break menu rather than guessing which phase
     // (and duration) to jump into next — mirrors the solo timer's "Stop".
-    await supabase
-      .from("sessions")
-      .update({ status: "idle", phase_ends_at: null, last_active_at: new Date().toISOString() })
-      .eq("slug", slug);
+    const patch: Partial<SessionRow> = {
+      status: "idle",
+      phase_ends_at: null,
+      last_active_at: new Date().toISOString(),
+    };
+
+    let previousRow!: SessionRow;
+    setRow((current) => {
+      previousRow = current;
+      return { ...current, ...patch };
+    });
+
+    const { error } = await supabase.from("sessions").update(patch).eq("slug", slug);
+    if (error) {
+      setRow(previousRow);
+      toast.error("Couldn't stop — try again.");
+    }
   }, [slug]);
 
   // Best-effort: whichever connected client is still open when a running
