@@ -62,7 +62,7 @@ src/
     DurationCircles.tsx              [PRONTO] círculos de duração — ver "Padrões estabelecidos"
     TimerControl.tsx                 [PRONTO, verificado no browser via SoloTimer] motif+clock+menu+picker compartilhado solo+sessão
     UserBadge.tsx                    [PRONTO, verificado no browser] círculo de iniciais + nome, read-only ou clicável
-    MyIdentityBadge.tsx              [PRONTO, verificado no browser] sua própria UserBadge, editável inline
+    MyIdentityBadge.tsx              [PRONTO, verificado no browser] sua própria UserBadge, editável inline — cancelar com X/Escape/clicar fora (nomear já vinha preenchido com o nome atual, então um blur que só fechava "se vazio" nunca disparava; corrigido pra sempre cancelar)
     SiteHeader.tsx                   [PRONTO] "Syncpair" + MyIdentityBadge no canto — usado nas 3 páginas (/, /new, /[slug])
   features/
     solo-timer/{SoloTimer.tsx,useSoloTimer.ts}       [PRONTO, verificado no browser] só monta TimerControl (+ menuExtra "Create a shared session")

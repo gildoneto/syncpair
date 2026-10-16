@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User } from "lucide-react";
+import { User, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { UserBadge } from "@/components/UserBadge";
 import { useIdentity } from "@/hooks/use-identity";
@@ -20,6 +20,11 @@ export function MyIdentityBadge() {
   if (!hydrated) return null;
 
   if (editing) {
+    function cancel() {
+      setEditing(false);
+      setDraft("");
+    }
+
     return (
       <form
         onSubmit={(e) => {
@@ -28,16 +33,28 @@ export function MyIdentityBadge() {
           setName(draft);
           setEditing(false);
         }}
+        className="flex items-center gap-1"
       >
         <Input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          onBlur={() => !draft.trim() && setEditing(false)}
+          onKeyDown={(e) => e.key === "Escape" && cancel()}
+          onBlur={cancel}
           placeholder="Your name"
           autoFocus
           maxLength={40}
-          className="h-9 w-28 text-xs"
+          className="h-9 w-24 text-xs"
         />
+        {/* onMouseDown (not onClick): fires before the input's blur, so this
+            isn't a race against `cancel` already having cleared the form. */}
+        <button
+          type="button"
+          onMouseDown={cancel}
+          aria-label="Cancel"
+          className="flex size-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted"
+        >
+          <X className="size-3.5" />
+        </button>
       </form>
     );
   }
