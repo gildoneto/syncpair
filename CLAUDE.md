@@ -29,6 +29,7 @@ Nasceu de uma sessão `/grill-me` completa (pesquisa do cuckoo.team via Wayback 
 - **Tipografia**: Nunito (variável, sem `weight` array — ver comentário em `layout.tsx`: Next 16/Turbopack quebra se você tentar passar pesos discretos num Google Font variável). Substituiu a Geist padrão do create-next-app.
 - **Fluxo de criar sessão é um wizard de 3 passos** (`NewSessionWizard.tsx`), não um formulário de tela única — inspirado na análise do fluxo original do cuckoo.team (homepage de um campo só → gate de nome → tela de duração). Nome da sessão → seu nome → duração, stepper local (sem rota por passo).
 - **Duração é escolhida por círculos de tamanho proporcional** (`DurationCircles.tsx` + `src/lib/circle-size.ts`, raiz quadrada do valor — área proporcional, não diâmetro), não por input numérico + chips. Tocar no círculo já aplica; no timer solo, já começa a contagem direto (sem botão de confirmação). Adicionar um valor customizado é uma ação secundária discreta (um "+" tracejado), nunca um input sempre visível.
+- **Homepage é um menu de 3 opções, não um formulário com tudo visível de uma vez**: `SoloTimer.tsx` abre em "menu" (Focus / Break / Create a shared session) — nunca os dois conjuntos de círculos ao mesmo tempo. Clicar em Focus ou Break revela só os círculos daquele tipo, com um "Back" pra voltar ao menu; "Create a shared session" é a 3ª opção no mesmo nível (não um link separado no rodapé). `Stop` sempre volta pro menu de 3 opções, nunca direto pros círculos. Mesmo princípio do wizard de sessão ("não mostrar opções demais a não ser que o usuário peça"), aplicado também na tela inicial — mais fiel ao cuckoo.team original.
 
 ## Infraestrutura (LIVE)
 
@@ -55,7 +56,7 @@ src/
     motifs/LampMotif.tsx             [PRONTO, 1ª versão] contrato visual — arte final é um passe de design separado
     DurationCircles.tsx              [PRONTO] círculos de duração — ver "Padrões estabelecidos"
   features/
-    solo-timer/{SoloTimer.tsx,useSoloTimer.ts}       [PRONTO, verificado no browser] círculos tocam-e-começa
+    solo-timer/{SoloTimer.tsx,useSoloTimer.ts}       [PRONTO, verificado no browser] menu de 3 opções → círculos tocam-e-começa
     session/
       NewSessionWizard.tsx / actions.ts               [PRONTO, verificado o caminho de erro — falta Supabase real] wizard de 3 passos
       NameGate.tsx / SessionRoom.tsx / useSessionRoom.ts [PRONTO, NÃO verificado end-to-end — precisa de Supabase real]
@@ -76,7 +77,7 @@ PRODUCT.md / DESIGN.md / .impeccable/design.json  [PRONTO] gerados via skill imp
 ## Status atual (out/2026)
 
 **Código do v1 completo e passando `tsc`/`lint` limpos.** Verificado no browser:
-- Timer solo: círculos de duração tocam-e-começam (sem botão extra), ciclo completo foco→pausa, zero chamada de rede pro Supabase, sobrevive a refresh via localStorage, tipografia Nunito + brilho quente confirmados em claro e escuro.
+- Timer solo: homepage abre num menu de 3 opções (Focus/Break/Create a shared session); Focus/Break revelam só os círculos daquele tipo (tocam-e-começam, sem botão extra) com um "Back"; Stop sempre volta pro menu. Ciclo completo foco→pausa, zero chamada de rede pro Supabase, sobrevive a refresh via localStorage, tipografia Nunito + brilho quente confirmados em claro e escuro.
 - `/new`: wizard de 3 passos completo (nome → seu nome → duração), voltar/continuar funcionando, adicionar preset customizado funcionando; submissão final falha com erro claro e esperado (`supabaseUrl is required`) — confirma que o caminho de código está certo, só falta credencial real.
 - Todo o texto voltado ao usuário em inglês (`lang="en"`).
 
