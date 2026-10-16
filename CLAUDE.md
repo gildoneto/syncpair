@@ -32,6 +32,7 @@ Nasceu de uma sessão `/grill-me` completa (pesquisa do cuckoo.team via Wayback 
 - **`.npmrc` do projeto fixa `registry=https://registry.npmjs.org/`** — esta máquina também é usada pro trabalho, e o `~/.npmrc` global aponta pro Artifactory privado da Grainger. Isso **quebrou o primeiro deploy na Vercel**: o `package-lock.json` gerado localmente gravou 773 `resolved:` apontando pro registry privado, e o build remoto não consegue autenticar lá (erro `npm error code E401`). Corrigido regenerando o lockfile com `--registry=` explícito + `.npmrc` do projeto pra nunca mais depender do default global. **Todo projeto pessoal novo nesta máquina precisa desse mesmo `.npmrc`** (não existe equivalente ao `includeIf` do git pra isso — testado e confirmado que npm não lê `.npmrc` de pastas ancestrais, só da pasta exata do projeto + `~/.npmrc`).
 - **`cacheComponents`/`partialPrefetching` removidos do `next.config.ts`** — vieram do scaffold inicial (create-next-app), mas iam contra a decisão original de não usar Cache Components (nada no app se beneficia: `/` e `/new` são 100% client, só `/[slug]` busca dado do servidor, e esse dado é sempre ao vivo, nunca deveria cachear). Com `cacheComponents: true`, o build de produção falhava tentando prerenderizar `/[slug]` estaticamente; sem ele, a rota é corretamente `ƒ Dynamic`.
 - **`TimerControl` (`src/components/TimerControl.tsx`) é o motif+clock+menu+picker compartilhado entre timer solo E sala de sessão** — mesmo componente, não duas implementações paralelas. Idle sempre abre num menu de botões (nunca os dois conjuntos de círculos ao mesmo tempo): Focus/Break no timer solo e na sala (+ "Create a shared session" como `menuExtra`, só no solo). Clicar em Focus/Break revela só os círculos daquele tipo com um "Back"; `Stop` sempre volta pro menu, nunca direto pros círculos. Na sala, escolher a duração também já inicia a fase pra todo mundo (`startPhase(phase, minutes)`) — a duração deixou de ser fixada na criação da sessão, pode mudar a cada rodada. Mesmo princípio em toda a UI ("não mostrar opções demais a não ser que o usuário peça") — mais fiel ao cuckoo.team original, e evita duplicar essa lógica entre os dois modos.
+- **Identidade é global, não por sessão** (`src/hooks/use-identity.ts`, chave `syncpair:name`) — definida uma vez (timer solo ou entrando numa sessão), lembrada em qualquer lugar. Exibida via `UserBadge` (círculo com iniciais + nome embaixo, estilo cuckoo.team) em todo canto que mostra identidade: seu próprio badge editável (`MyIdentityBadge`) no canto do `SiteHeader`, presente nas 3 páginas (`/`, `/new`, `/[slug]`); lista de participantes na sala (`SessionRoom`) vira uma fileira de `UserBadge` em vez de texto puro. Gravatar fica pra v1.1 — quando entrar, troca só o conteúdo do círculo do `UserBadge`, sem mexer no resto.
 
 ## Infraestrutura (LIVE)
 
@@ -59,11 +60,16 @@ src/
     motifs/LampMotif.tsx             [PRONTO, 1ª versão] contrato visual — arte final é um passe de design separado
     DurationCircles.tsx              [PRONTO] círculos de duração — ver "Padrões estabelecidos"
     TimerControl.tsx                 [PRONTO, verificado no browser via SoloTimer] motif+clock+menu+picker compartilhado solo+sessão
+    UserBadge.tsx                    [PRONTO, verificado no browser] círculo de iniciais + nome, read-only ou clicável
+    MyIdentityBadge.tsx              [PRONTO, verificado no browser] sua própria UserBadge, editável inline
+    SiteHeader.tsx                   [PRONTO] "Syncpair" + MyIdentityBadge no canto — usado nas 3 páginas (/, /new, /[slug])
   features/
     solo-timer/{SoloTimer.tsx,useSoloTimer.ts}       [PRONTO, verificado no browser] só monta TimerControl (+ menuExtra "Create a shared session")
     session/
       NewSessionWizard.tsx / actions.ts               [PRONTO, verificado o caminho de erro — falta Supabase real] wizard de 2 passos (nome → seu nome → cria), sem duração
-      NameGate.tsx / SessionRoom.tsx / useSessionRoom.ts [PRONTO, tsc/lint limpos, NÃO verificado end-to-end no browser — precisa de Supabase real] SessionRoom monta o mesmo TimerControl; useSessionRoom.startPhase(phase, minutes) grava a duração escolhida na hora
+      NameGate.tsx / SessionRoom.tsx / useSessionRoom.ts [PRONTO, verificado end-to-end no browser, local e produção] SessionRoom monta o mesmo TimerControl + UserBadge por participante; useSessionRoom.startPhase(phase, minutes) grava a duração escolhida na hora
+  hooks/
+    use-identity.ts                 [PRONTO, verificado no browser] nome global (não por sessão) — ver "Decisões técnicas"
   lib/
     supabase/{client.ts,server.ts,admin.ts}  [PRONTO] — ver nota "Sem @supabase/ssr" acima
     timer/{state-machine.ts,format.ts}       [PRONTO, compartilhado solo+sessão]

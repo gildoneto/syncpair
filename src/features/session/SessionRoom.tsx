@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TimerControl } from "@/components/TimerControl";
+import { UserBadge } from "@/components/UserBadge";
 import { usePresets } from "@/hooks/use-presets";
 import { sessionRowToTimerState, type SessionRow } from "@/types/session";
 import { useSessionRoom } from "@/features/session/useSessionRoom";
@@ -41,9 +42,13 @@ export function SessionRoom({
         onAddPreset={addPreset}
       />
 
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col items-center gap-4">
         {participants.length > 0 && (
-          <p className="text-sm text-muted-foreground">{participants.map((p) => p.name).join(", ")}</p>
+          <div className="flex flex-wrap items-start justify-center gap-4">
+            {participants.map((p) => (
+              <UserBadge key={p.name} name={p.name} size="sm" />
+            ))}
+          </div>
         )}
         <Button variant="ghost" size="sm" onClick={copyLink}>
           {copied ? "Link copied!" : "Copy session link"}

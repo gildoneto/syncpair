@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase/server";
+import { SiteHeader } from "@/components/SiteHeader";
 import { NameGate } from "@/features/session/NameGate";
 import type { SessionRow } from "@/types/session";
 
@@ -25,11 +26,7 @@ export default async function SessionPage({ params }: { params: Promise<{ slug: 
 
   return (
     <main className="flex flex-1 flex-col">
-      <header className="flex items-center justify-center py-6">
-        <span className="text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
-          Syncpair
-        </span>
-      </header>
+      <SiteHeader />
       <NameGate slug={slug} initial={row} />
     </main>
   );
