@@ -53,24 +53,29 @@ export function useSessionRoom(slug: string, initial: SessionRow, name: string |
     };
   }, [slug, name, presenceKey]);
 
+  // Takes the duration explicitly (chosen that moment from DurationCircles,
+  // mirroring the solo timer's startWithDuration) rather than reading it off
+  // the row — the room no longer locks durations in at creation time, so
+  // each start also writes the chosen value back into the matching column.
   const startPhase = useCallback(
-    async (phase: Phase) => {
-      const durationSec = phase === "focus" ? row.focus_duration_seconds : row.break_duration_seconds;
+    async (phase: Phase, minutes: number) => {
+      const durationSec = Math.round(minutes * 60);
       await supabase
         .from("sessions")
         .update({
           phase,
           status: "running",
           phase_ends_at: new Date(Date.now() + durationSec * 1000).toISOString(),
+          [phase === "focus" ? "focus_duration_seconds" : "break_duration_seconds"]: durationSec,
           last_active_at: new Date().toISOString(),
         })
         .eq("slug", slug);
     },
-    [slug, row.focus_duration_seconds, row.break_duration_seconds],
+    [slug],
   );
 
   const stopPhase = useCallback(async () => {
-    // Goes back to the two start buttons rather than guessing which phase
+    // Goes back to the Focus/Break menu rather than guessing which phase
     // (and duration) to jump into next — mirrors the solo timer's "Stop".
     await supabase
       .from("sessions")

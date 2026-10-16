@@ -6,8 +6,6 @@ import { generateSlug, slugify, RESERVED_SLUGS } from "@/lib/slug";
 export interface CreateSessionInput {
   slug?: string;
   creatorName?: string;
-  focusMinutes: number;
-  breakMinutes: number;
 }
 
 export type CreateSessionResult =
@@ -20,13 +18,15 @@ export type CreateSessionResult =
  * random one. A collision on a *chosen* name surfaces as a validation error
  * so the person can pick another — never a silent substitution, which would
  * be surprising given they explicitly typed a name.
+ *
+ * No duration input here — focus/break durations are left at the table's
+ * defaults (25min/5min) and only get set once someone picks a duration in
+ * the room itself (see useSessionRoom.startPhase).
  */
 export async function createSession(input: CreateSessionInput): Promise<CreateSessionResult> {
   const supabase = createServerClient();
   const base = {
     created_by_name: input.creatorName?.trim() || null,
-    focus_duration_seconds: Math.round(input.focusMinutes * 60),
-    break_duration_seconds: Math.round(input.breakMinutes * 60),
   };
 
   if (input.slug) {

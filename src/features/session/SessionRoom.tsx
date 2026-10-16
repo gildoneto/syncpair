@@ -2,13 +2,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { LampMotif } from "@/components/motifs/LampMotif";
-import { useCountdown } from "@/hooks/use-countdown";
-import { formatDuration } from "@/lib/timer/format";
+import { TimerControl } from "@/components/TimerControl";
+import { usePresets } from "@/hooks/use-presets";
 import { sessionRowToTimerState, type SessionRow } from "@/types/session";
 import { useSessionRoom } from "@/features/session/useSessionRoom";
-
-const PHASE_LABEL = { focus: "Focus", break: "Break" } as const;
 
 export function SessionRoom({
   slug,
@@ -20,9 +17,8 @@ export function SessionRoom({
   name: string;
 }) {
   const { row, participants, startPhase, stopPhase } = useSessionRoom(slug, initial, name);
+  const { presets, addPreset } = usePresets();
   const state = sessionRowToTimerState(row);
-  const secondsLeft = useCountdown(state);
-  const otherPhase = state.phase === "focus" ? "break" : "focus";
   const [copied, setCopied] = useState(false);
 
   function copyLink() {
@@ -34,34 +30,16 @@ export function SessionRoom({
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-10 px-6 py-16">
-      <LampMotif phase={state.phase} status={state.status} className="h-48 w-36" />
-
-      <div className="flex flex-col items-center gap-2">
-        <span className="text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
-          {PHASE_LABEL[state.phase]}
-        </span>
-        <span className="text-[clamp(3.5rem,12vw,6rem)] font-extrabold tracking-[-0.02em] tabular-nums text-foreground">
-          {formatDuration(secondsLeft)}
-        </span>
-      </div>
-
-      {/* Any participant can advance the timer — there's no durable way to tell
-          "the creator" apart from anyone else without accounts (decision #4),
-          and creator-only control would strand the group if they disconnect. */}
-      {state.status === "idle" ? (
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Button size="lg" onClick={() => startPhase(state.phase)}>
-            Start {PHASE_LABEL[state.phase].toLowerCase()}
-          </Button>
-          <Button size="lg" variant="outline" onClick={() => startPhase(otherPhase)}>
-            Start {PHASE_LABEL[otherPhase].toLowerCase()}
-          </Button>
-        </div>
-      ) : (
-        <Button size="lg" variant="ghost" onClick={stopPhase}>
-          Stop
-        </Button>
-      )}
+      {/* Same Focus/Break menu → duration circles as the solo timer (decision
+          shared via TimerControl) — any participant can pick a phase and
+          duration, there's no durable "creator" to restrict it to (decision #4). */}
+      <TimerControl
+        state={state}
+        presets={presets}
+        onStart={startPhase}
+        onStop={stopPhase}
+        onAddPreset={addPreset}
+      />
 
       <div className="flex flex-col items-center gap-3">
         {participants.length > 0 && (

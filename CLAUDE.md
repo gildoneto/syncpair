@@ -27,9 +27,9 @@ Nasceu de uma sessão `/grill-me` completa (pesquisa do cuckoo.team via Wayback 
 - **Lint**: `react-hooks/set-state-in-effect` rebaixado pra `warn` em `eslint.config.mjs` (mesmo padrão do gastos-imovel) — seedar state a partir de uma leitura não-determinística/browser-only (`Date.now()`, `localStorage`, `window.location`, `crypto.randomUUID()`) é legítimo, e essa regra nova do `eslint-config-next` sinaliza isso como erro.
 - **Idioma da UI: inglês** (`lang="en"`, decisão explícita do usuário) — todo texto voltado ao usuário (telas, mensagens de erro, metadata) é em inglês. Documentação do projeto (este arquivo, `PRODUCT.md`, `DESIGN.md`) continua em português, pelo mesmo motivo que esta conversa é em português: é a língua do usuário, não do produto.
 - **Tipografia**: Nunito (variável, sem `weight` array — ver comentário em `layout.tsx`: Next 16/Turbopack quebra se você tentar passar pesos discretos num Google Font variável). Substituiu a Geist padrão do create-next-app.
-- **Fluxo de criar sessão é um wizard de 3 passos** (`NewSessionWizard.tsx`), não um formulário de tela única — inspirado na análise do fluxo original do cuckoo.team (homepage de um campo só → gate de nome → tela de duração). Nome da sessão → seu nome → duração, stepper local (sem rota por passo).
-- **Duração é escolhida por círculos de tamanho proporcional** (`DurationCircles.tsx` + `src/lib/circle-size.ts`, raiz quadrada do valor — área proporcional, não diâmetro), não por input numérico + chips. Tocar no círculo já aplica; no timer solo, já começa a contagem direto (sem botão de confirmação). Adicionar um valor customizado é uma ação secundária discreta (um "+" tracejado), nunca um input sempre visível.
-- **Homepage é um menu de 3 opções, não um formulário com tudo visível de uma vez**: `SoloTimer.tsx` abre em "menu" (Focus / Break / Create a shared session) — nunca os dois conjuntos de círculos ao mesmo tempo. Clicar em Focus ou Break revela só os círculos daquele tipo, com um "Back" pra voltar ao menu; "Create a shared session" é a 3ª opção no mesmo nível (não um link separado no rodapé). `Stop` sempre volta pro menu de 3 opções, nunca direto pros círculos. Mesmo princípio do wizard de sessão ("não mostrar opções demais a não ser que o usuário peça"), aplicado também na tela inicial — mais fiel ao cuckoo.team original.
+- **Fluxo de criar sessão é um wizard de 2 passos** (`NewSessionWizard.tsx`), não um formulário de tela única — inspirado na análise do fluxo original do cuckoo.team. Nome da sessão → seu nome → cria (stepper local, sem rota por passo). **Sem passo de duração**: a sessão nasce com os defaults da tabela (25min/5min) e a duração só é escolhida depois, na sala — ver bullet do `TimerControl` abaixo. Criar uma sessão não deveria exigir decidir quanto tempo de foco/pausa vai durar antes mesmo de existir.
+- **Duração é escolhida por círculos de tamanho proporcional** (`DurationCircles.tsx` + `src/lib/circle-size.ts`, raiz quadrada do valor — área proporcional, não diâmetro), não por input numérico + chips. Tocar no círculo já aplica; já começa a contagem direto (sem botão de confirmação). Adicionar um valor customizado é uma ação secundária discreta (um "+" tracejado), nunca um input sempre visível.
+- **`TimerControl` (`src/components/TimerControl.tsx`) é o motif+clock+menu+picker compartilhado entre timer solo E sala de sessão** — mesmo componente, não duas implementações paralelas. Idle sempre abre num menu de botões (nunca os dois conjuntos de círculos ao mesmo tempo): Focus/Break no timer solo e na sala (+ "Create a shared session" como `menuExtra`, só no solo). Clicar em Focus/Break revela só os círculos daquele tipo com um "Back"; `Stop` sempre volta pro menu, nunca direto pros círculos. Na sala, escolher a duração também já inicia a fase pra todo mundo (`startPhase(phase, minutes)`) — a duração deixou de ser fixada na criação da sessão, pode mudar a cada rodada. Mesmo princípio em toda a UI ("não mostrar opções demais a não ser que o usuário peça") — mais fiel ao cuckoo.team original, e evita duplicar essa lógica entre os dois modos.
 
 ## Infraestrutura (LIVE)
 
@@ -55,11 +55,12 @@ src/
     ui/                              shadcn primitives (button, input, label)
     motifs/LampMotif.tsx             [PRONTO, 1ª versão] contrato visual — arte final é um passe de design separado
     DurationCircles.tsx              [PRONTO] círculos de duração — ver "Padrões estabelecidos"
+    TimerControl.tsx                 [PRONTO, verificado no browser via SoloTimer] motif+clock+menu+picker compartilhado solo+sessão
   features/
-    solo-timer/{SoloTimer.tsx,useSoloTimer.ts}       [PRONTO, verificado no browser] menu de 3 opções → círculos tocam-e-começa
+    solo-timer/{SoloTimer.tsx,useSoloTimer.ts}       [PRONTO, verificado no browser] só monta TimerControl (+ menuExtra "Create a shared session")
     session/
-      NewSessionWizard.tsx / actions.ts               [PRONTO, verificado o caminho de erro — falta Supabase real] wizard de 3 passos
-      NameGate.tsx / SessionRoom.tsx / useSessionRoom.ts [PRONTO, NÃO verificado end-to-end — precisa de Supabase real]
+      NewSessionWizard.tsx / actions.ts               [PRONTO, verificado o caminho de erro — falta Supabase real] wizard de 2 passos (nome → seu nome → cria), sem duração
+      NameGate.tsx / SessionRoom.tsx / useSessionRoom.ts [PRONTO, tsc/lint limpos, NÃO verificado end-to-end no browser — precisa de Supabase real] SessionRoom monta o mesmo TimerControl; useSessionRoom.startPhase(phase, minutes) grava a duração escolhida na hora
   lib/
     supabase/{client.ts,server.ts,admin.ts}  [PRONTO] — ver nota "Sem @supabase/ssr" acima
     timer/{state-machine.ts,format.ts}       [PRONTO, compartilhado solo+sessão]
@@ -77,11 +78,11 @@ PRODUCT.md / DESIGN.md / .impeccable/design.json  [PRONTO] gerados via skill imp
 ## Status atual (out/2026)
 
 **Código do v1 completo e passando `tsc`/`lint` limpos.** Verificado no browser:
-- Timer solo: homepage abre num menu de 3 opções (Focus/Break/Create a shared session); Focus/Break revelam só os círculos daquele tipo (tocam-e-começam, sem botão extra) com um "Back"; Stop sempre volta pro menu. Ciclo completo foco→pausa, zero chamada de rede pro Supabase, sobrevive a refresh via localStorage, tipografia Nunito + brilho quente confirmados em claro e escuro.
-- `/new`: wizard de 3 passos completo (nome → seu nome → duração), voltar/continuar funcionando, adicionar preset customizado funcionando; submissão final falha com erro claro e esperado (`supabaseUrl is required`) — confirma que o caminho de código está certo, só falta credencial real.
+- Timer solo: homepage abre num menu (Focus/Break/Create a shared session); Focus/Break revelam só os círculos daquele tipo (tocam-e-começam, sem botão extra) com um "Back"; Stop sempre volta pro menu. Ciclo completo foco→pausa, zero chamada de rede pro Supabase, sobrevive a refresh via localStorage, tipografia Nunito + brilho quente confirmados em claro e escuro.
+- `/new`: wizard de 2 passos completo (nome → seu nome → cria, sem passo de duração), voltar/continuar funcionando; submissão final falha com erro claro e esperado (`supabaseUrl is required`) — confirma que o caminho de código está certo, só falta credencial real.
 - Todo o texto voltado ao usuário em inglês (`lang="en"`).
 
-**Não verificado ainda** (precisa do Supabase real existir): criar sessão de verdade, `/[slug]` servindo uma sessão real, sync de presença/timer entre duas abas, o cron de expiração rodando contra dados reais, deploy na Vercel.
+**Não verificado ainda** (precisa do Supabase real existir): criar sessão de verdade, `/[slug]` servindo uma sessão real, `SessionRoom` renderizando o `TimerControl` com dados reais (tsc confirma os tipos batendo, mas não foi visto no browser), sync de presença/timer entre duas abas, o cron de expiração rodando contra dados reais, deploy na Vercel.
 
 ## Próximos passos
 
@@ -95,10 +96,11 @@ PRODUCT.md / DESIGN.md / .impeccable/design.json  [PRONTO] gerados via skill imp
 
 - **Slugs**: `src/lib/slug.ts` — `slugify()` pra normalizar entrada do usuário, `generateSlug()` (nanoid 8 chars) como fallback, `RESERVED_SLUGS` pra evitar colisão com rotas reais.
 - **Timer compartilhado**: nunca duplicar lógica de transição entre solo e sessão — sempre via `src/lib/timer/state-machine.ts` + `src/hooks/use-countdown.ts`. Sessão converte `SessionRow` → `TimerState` via `sessionRowToTimerState` (`src/types/session.ts`).
+- **UI do timer também é compartilhada**: `src/components/TimerControl.tsx` é o único lugar que desenha motif+clock+menu+picker — `SoloTimer` e `SessionRoom` só montam esse componente passando `state`/`presets`/`onStart`/`onStop`/`onAddPreset` (+ `menuExtra` opcional). Nunca recriar esse menu/picker num dos dois lados.
 - **Realtime**: um único channel por sessão (`session:<slug>`), presence + postgres_changes juntos — nunca dois channels pra mesma sala. Chave de presença gerada num `useEffect` (nunca em `useRef` lido durante o render — colidiria entre visitantes se a página fosse pré-renderizada).
 - **RLS**: `anon` pode select/insert/update (colunas específicas via `grant update (...) to anon`); delete só via `service_role` (só o cron usa). Ver `supabase/migrations/0001_init.sql`.
 - **Hostname nunca hardcoded**: link compartilhável usa `window.location.origin` (correto em qualquer domínio/preview automaticamente); `metadataBase` usa `NEXT_PUBLIC_APP_URL` (troca de domínio é só variável de ambiente).
-- **Presets de duração**: lista única compartilhada (`src/hooks/use-presets.ts`, localStorage) entre timer solo e wizard — um preset salvo em qualquer lugar aparece clicável nos dois. Sempre renderizado via `DurationCircles`, nunca um input numérico solto.
+- **Presets de duração**: lista única compartilhada (`src/hooks/use-presets.ts`, localStorage) entre timer solo e sala de sessão (via `TimerControl`) — um preset salvo em qualquer lugar aparece clicável nos dois. Sempre renderizado via `DurationCircles`, nunca um input numérico solto.
 - **Cursor pointer em todo elemento clicável**: regra global em `globals.css` (`button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }`), não uma classe `cursor-pointer` por componente — todo botão novo já nasce certo. Padrão esperado em qualquer projeto de frontend, não só aqui.
 
 ## Dev local
